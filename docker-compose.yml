@@ -1,0 +1,37 @@
+version: "3.8"
+services:
+  database:
+    image: mongo:latest
+    container_name: MyMongoDB
+    networks:
+      - backend
+    volumes:
+      - mongodata:/data/db  
+    environment:
+      - MONGO_URL=$(cat ./backend/.env | grep MONGO_URI | cut -d '=' -f2)
+  server:
+    build: ./api
+    container_name: backend
+    ports:
+      - 9999:9999
+    networks:
+      - backend
+      - frontend
+    volumes:
+      - ./api:/app
+    depends_on:
+      - database
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - 80:5173
+    networks:
+      - frontend
+    volumes:
+      - ./frontend:/app
+networks:
+  backend:
+  frontend:
+volumes:
+  mongodata:
